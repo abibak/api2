@@ -1,0 +1,44 @@
+version: "3.7"
+
+networks:
+  lumen:
+
+services:
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - "8080:80"
+    links:
+      - php
+    volumes:
+      - ./:/var/www/lumen
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+      - db
+    networks:
+      - lumen
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php
+    volumes:
+      - ./:/var/www/lumen
+    networks:
+      - lumen
+
+  db:
+    image: postgres
+    container_name: pgsql
+    hostname: postgresql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=api2
+    ports:
+      - "5432:5432"
+    networks:
+      - lumen
